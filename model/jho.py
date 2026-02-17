@@ -245,7 +245,7 @@ class FlightSegment(Model):
             self.constraints.extend([self.aircraftPerf["W_{end}"][:-1] >=
                                      self.aircraftPerf["W_{start}"][1:]])
 
-        return self.aircraft, self.submodels, self.constraints
+        return self.submodels, self.constraints
 
 class Loiter(Model):
     "make a loiter flight segment"
