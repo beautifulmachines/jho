@@ -3,7 +3,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import random
-from gpkit.repr_conventions import unitstr
+from gpkit.util.repr_conventions import unitstr
 
 #pylint: disable=invalid-name, anomalous-backslash-in-string
 

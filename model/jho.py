@@ -12,7 +12,7 @@ from gpkitmodels.tools.summing_constraintset import summing_vars
 from gpkit import Model, Variable, Vectorize, units
 from gpkit.tools.autosweep import autosweep_1d
 import matplotlib.pyplot as plt
-from sens_chart import get_highestsens, plot_chart
+from model.sens_chart import get_highestsens, plot_chart
 
 # pylint: disable=invalid-name
 
@@ -245,7 +245,7 @@ class FlightSegment(Model):
             self.constraints.extend([self.aircraftPerf["W_{end}"][:-1] >=
                                      self.aircraftPerf["W_{start}"][1:]])
 
-        return self.aircraft, self.submodels, self.constraints
+        return self.submodels, self.constraints
 
 class Loiter(Model):
     "make a loiter flight segment"
@@ -333,13 +333,16 @@ class Mission(Model):
 
         self.JHO = Aircraft(Wfueltot, df70=DF70)
 
-        LS = Variable("(W/S)", "lbf/ft**2", "wing loading",
-                      evalfn=lambda v: v[mtow]/v[self.JHO.wing.planform["S"]])
+        # TODO: restore computed wing loading variable
+        # Previously used evalfn= which is no longer supported.
+        # model.computed[LS.key] can be set post-construction instead.
+        # LS = Variable("(W/S)", "lbf/ft**2", "wing loading")
 
         climb1 = Climb(10, self.JHO, alt=np.linspace(0, 15000, 11)[1:], etap=0.508, wind=wind)
         cruise1 = Cruise(1, self.JHO, etap=0.684, R=180, wind=wind)
-        loiter1 = Loiter(5, self.JHO, etap=0.647, wind=wind)
+        self.loiter = Loiter(5, self.JHO, etap=0.647, wind=wind)
         cruise2 = Cruise(1, self.JHO, etap=0.684, wind=wind)
+        loiter1 = self.loiter
         mission = [climb1, cruise1, loiter1, cruise2]
         loading = self.JHO.loading(loiter1.fs.fs, Wcent)
 
@@ -365,7 +368,7 @@ def test():
     "test method run by external CI"
     model = Mission()
     model.substitutions[model.JHO.emp.vtail.Vv] = 0.04
-    model.cost = 1/model["Mission.Loiter.t"]
+    model.cost = 1/model.loiter["t"]
     model.localsolve()
 
 if __name__ == "__main__":
