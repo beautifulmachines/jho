@@ -71,9 +71,9 @@ class Aircraft(Model):
             self.emp.tailboom["l"] >= (
                 self.emp.htail.lh
                 + self.emp.htail.planform.croot),
-            4./6*pi*self.fuselage["k_{nose}"]*self.fuselage["R"]**3 >= Volpay,
-            self.fuselage["\\mathcal{V}_{body}"] >= (
-                self.fuselage.fueltank["\\mathcal{V}"] + Volavn),
+            4./6*pi*self.fuselage.k_nose*self.fuselage["R"]**3 >= Volpay,
+            self.fuselage.Vol_body >= (
+                self.fuselage.fueltank.Vol + Volavn),
             ]
 
         if df70:
@@ -239,7 +239,7 @@ class FlightSegment(Model):
 
         Wfuelfs = Variable("W_{fuel-fs}", "lbf", "flight segment fuel weight")
 
-        self.constraints = [Wfuelfs >= self.be["W_{fuel}"].sum()]
+        self.constraints = [Wfuelfs >= self.be.W_fuel.sum()]
 
         if N > 1:
             self.constraints.extend([self.aircraftPerf["W_{end}"][:-1] >=
